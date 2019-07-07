@@ -1,5 +1,3 @@
-let cookies;
-
 /**
  * Given a cookie string, this function returns an object of key-value pairs.
  *
