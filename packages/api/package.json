@@ -1,6 +1,6 @@
 {
   "name": "@stormkit/api",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Official API library for Stormkit applications",
   "main": "dist/index.js",
   "scripts": {
