@@ -1,0 +1,6 @@
+# Dist folder and packages
+node_modules/
+dist/
+
+# IDE related
+.DS_Store

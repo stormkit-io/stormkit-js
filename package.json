@@ -1,0 +1,39 @@
+{
+  "name": "stormkit-js",
+  "version": "1.0.2",
+  "description": "Official javascript repository for Stormkit applications",
+  "main": "index.js",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "publish:api": "cd packages/api && rollup -c rollup.config.js && npm publish --access public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stormkit-io/stormkit-js.git"
+  },
+  "keywords": [
+    "serverless",
+    "javascript",
+    "stormkit"
+  ],
+  "author": "@stormkit-io",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stormkit-io/stormkit-js/issues"
+  },
+  "homepage": "https://github.com/stormkit-io/stormkit-js#readme",
+  "dependencies": {
+    "@babel/core": "^7.0.0-0",
+    "@babel/preset-env": "^7.5.0",
+    "jest": "^24.8.0",
+    "jsdom": "^15.1.1",
+    "rollup": "^1.11.3"
+  },
+  "devDependencies": {
+    "rollup-plugin-terser": "^4.0.4"
+  }
+}

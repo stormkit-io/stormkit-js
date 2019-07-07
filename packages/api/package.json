@@ -1,0 +1,30 @@
+{
+  "name": "@stormkit/api",
+  "version": "1.0.8",
+  "description": "Official API library for Stormkit applications",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "rollup -c rollup.config.js",
+    "version:patch": "npm version patch && git add . && git commit -m 'Bump version'",
+    "version:publish": "yarn build && bash ./publish.sh",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stormkit-io/stormkit-js.git"
+  },
+  "keywords": [
+    "stormkit"
+  ],
+  "files": [
+    "LICENSE",
+    "README.md",
+    "dist/"
+  ],
+  "author": "@stormkit-io",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/stormkit-io/stormkit-js/issues"
+  },
+  "homepage": "https://github.com/stormkit-io/stormkit-js#readme"
+}
