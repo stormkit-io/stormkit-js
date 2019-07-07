@@ -10,8 +10,8 @@ export default (label, ...data) => {
   }
 
   if (typeof window !== "undefined") {
-    return require("./log.client")(label, ...data);
+    return require("./log_client.js")(label, ...data);
   } else {
-    return require("./log.server")(label, ...data);
+    return require("./log_server.js")(label, ...data);
   }
 };
