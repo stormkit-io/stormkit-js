@@ -1,11 +1,12 @@
 {
   "name": "@stormkit/api",
-  "version": "1.0.8",
+  "version": "1.1.0",
   "description": "Official API library for Stormkit applications",
   "main": "dist/index.js",
   "scripts": {
     "build": "rollup -c rollup.config.js",
     "version:patch": "npm version patch && git add . && git commit -m 'Bump version'",
+    "version:minor": "npm version minor && git add . && git commit -m 'Bump version'",
     "version:publish": "yarn build && bash ./publish.sh",
     "test": "jest"
   },
