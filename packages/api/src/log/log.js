@@ -1,3 +1,6 @@
+import client from "./log_client";
+import server from "./log_server";
+
 /**
  * Helper function to log data to Stormkit. This function is async to make
  * it non-blocking. Currently, this implementation is server-side only. It
@@ -10,8 +13,8 @@ export default (label, ...data) => {
   }
 
   if (typeof window !== "undefined") {
-    return require("./log_client.js")(label, ...data);
+    return client(label, ...data);
   } else {
-    return require("./log_server.js")(label, ...data);
+    return server(label, ...data);
   }
 };

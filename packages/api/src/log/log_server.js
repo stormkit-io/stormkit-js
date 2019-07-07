@@ -1,5 +1,4 @@
 import headers from "../headers";
-import https from "https";
 
 /**
  * Helper function to log data to Stormkit. This function is async to make
@@ -28,7 +27,7 @@ export default (label, ...data) => {
       })
     };
 
-    const post = https.request(opts, res => res.on("end", resolve));
+    const post = require("https").request(opts, res => res.on("end", resolve));
     post.on("error", reject);
     post.write(postData);
     post.end();
