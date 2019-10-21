@@ -3,5 +3,12 @@ import identity from "./identity/identity";
 
 export default {
   config,
-  identity
+
+  user: (...args) => {
+    if (args.length) {
+      return identity.set(...args);
+    } else {
+      return identity.get();
+    }
+  }
 };
