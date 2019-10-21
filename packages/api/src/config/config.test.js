@@ -84,7 +84,7 @@ describe("config", () => {
       expect(
         JSON.parse(decodeURIComponent(cookies.parse(document.cookie).sk_rc))
       ).toEqual({
-        feature4: "75"
+        feature4: 80
       });
 
       expect(config().get("feature4")).toBe("value4-b"); // Should return the same value
