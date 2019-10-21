@@ -14,9 +14,17 @@ describe("config", () => {
     delete cookieCache.obj;
   };
 
-  describe("client-side", () => {
-    let mathRandom;
+  let mathRandom;
 
+  beforeAll(() => {
+    mathRandom = global.Math.random;
+  });
+
+  afterAll(() => {
+    global.Math.random = mathRandom;
+  });
+
+  describe("client-side", () => {
     const cnf = () => {
       cache.obj = undefined;
       removeCookies();
@@ -24,7 +32,6 @@ describe("config", () => {
     };
 
     beforeAll(() => {
-      mathRandom = global.Math.random;
       global.window = new jsdom.JSDOM(``);
       global.window.__SK__ = {
         config: {
@@ -58,7 +65,6 @@ describe("config", () => {
     afterAll(() => {
       delete global.window;
       delete global.document;
-      global.Math.random = mathRandom;
     });
 
     beforeEach(() => {
@@ -136,12 +142,14 @@ describe("config", () => {
     });
 
     test("should load the config, the rest is the same functionality with client-side", () => {
+      global.Math.random = jest.fn().mockReturnValue(0.75);
+
       const req = {
         header: jest.fn(),
         __SK__: {
           config: {
             feature: {
-              targetings: [{ value: "value" }]
+              targetings: [{ value: "value", percentile: "90" }]
             }
           }
         }
@@ -153,7 +161,10 @@ describe("config", () => {
 
       expect(config(req, res).get("feature")).toBe("value");
       expect(req.header).toHaveBeenCalledWith("cookie");
-      expect(res.setHeader).not.toHaveBeenCalled();
+      expect(res.setHeader).toHaveBeenCalledWith(
+        "Set-Cookie",
+        expect.stringMatching("sk_rc=%7B%22feature%22%3A75%7D;")
+      );
     });
   });
 });
