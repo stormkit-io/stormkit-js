@@ -7,3 +7,4 @@ echo "Publishing $VERSION. Commit hash: $HASH"
 
 git tag -a v$VERSION $HASH -m "Release v$VERSION"
 npm publish
+git push --follow-tags
