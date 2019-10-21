@@ -20,7 +20,7 @@ describe("cookies", () => {
 
     test("should return an object when the cookie header is there", () => {
       const { default: cookies } = require("./cookies");
-      const cks = cookies();
+      const cks = cookies.parse();
       expect(cks.sk_settings).toBe(encoded);
       expect(cks.sk_variant).toBe(variantId);
       expect(Object.keys(cks).length).toBe(2);
@@ -44,7 +44,7 @@ describe("cookies", () => {
         }
       };
 
-      const cks = cookies(req);
+      const cks = cookies.parse(req);
       expect(cks.sk_settings).toBe(encoded);
       expect(cks.sk_variant).toBe(variantId);
       expect(Object.keys(cks).length).toBe(2);
