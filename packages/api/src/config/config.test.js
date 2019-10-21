@@ -1,18 +1,25 @@
 import jsdom from "jsdom";
-import cookies, { cache as cookieCache } from "../cookies";
+import cookies, { clientSideCache as cookieCache } from "../cookies";
 import identity from "../identity/identity";
 import config, { cache } from "./config";
 
 describe("config", () => {
-  const encoded = encodeURIComponent(
-    JSON.stringify({ feature1: "value1-a", feature2: "value2" })
-  );
+  const removeCookies = () => {
+    document.cookie.split(";").forEach(function(c) {
+      document.cookie = c
+        .replace(/^ +/, "")
+        .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
+    });
+
+    delete cookieCache.obj;
+  };
 
   describe("client-side", () => {
     let mathRandom;
 
     const cnf = () => {
       cache.obj = undefined;
+      removeCookies();
       return config();
     };
 
@@ -59,35 +66,28 @@ describe("config", () => {
     });
 
     afterEach(() => {
-      document.cookie = "";
-
-      cookieCache &&
-        Object.keys(cookieCache).forEach(k => {
-          delete cookieCache[k];
-        });
-    });
-
-    test("should return the cookie values when the cookie is there", () => {
-      cookies.set({ name: "sk_rc", days: 10, value: encoded });
-      expect(cnf().get("feature1")).toBe("value1-a");
-      expect(cnf().get("feature2")).toBe("value2");
+      removeCookies();
     });
 
     test("single value, no condition", () => {
       expect(cnf().get("feature3")).toBe("value3");
     });
 
-    test("should save the value into a cookie", () => {
-      const conf = config();
+    test("should save the value into a cookie only when percentile is matched", () => {
+      global.Math.random = jest.fn().mockReturnValue(0.8);
       identity.set({ version: "7" });
-      expect(conf.get("feature3")).toBe("value3");
-      expect(decodeURIComponent(document.cookie)).toBe(
-        `sk_rc={"feature3":"value3"}; `
-      );
-      expect(conf.get("feature2")).toBe("value2");
-      expect(decodeURIComponent(document.cookie)).toBe(
-        `sk_rc={"feature3":"value3","feature2":"value2"}; `
-      );
+      expect(cnf().get("feature3")).toBe("value3");
+      expect(decodeURIComponent(document.cookie)).toBe("");
+      expect(cnf().get("feature4")).toBe("value4-b");
+      delete cookieCache.obj;
+
+      expect(
+        JSON.parse(decodeURIComponent(cookies.parse(document.cookie).sk_rc))
+      ).toEqual({
+        feature4: "75"
+      });
+
+      expect(config().get("feature4")).toBe("value4-b"); // Should return the same value
     });
 
     test("multiple values, different segments and appVersions", () => {
@@ -153,10 +153,7 @@ describe("config", () => {
 
       expect(config(req, res).get("feature")).toBe("value");
       expect(req.header).toHaveBeenCalledWith("cookie");
-      expect(res.setHeader).toHaveBeenCalledWith(
-        "Set-Cookie",
-        expect.stringMatching("sk_rc=%7B%22feature%22%3A%22value%22%7D;")
-      );
+      expect(res.setHeader).not.toHaveBeenCalled();
     });
   });
 });

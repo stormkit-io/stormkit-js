@@ -18,7 +18,7 @@ function parse(cookie = "") {
 }
 
 // Client side calls will be cached.
-export let cache;
+export let clientSideCache = {};
 
 export default {
   /**
@@ -27,11 +27,11 @@ export default {
   parse: req => {
     // Client-Side
     if (typeof document !== "undefined") {
-      if (typeof cache !== "undefined") {
-        return cache;
+      if (typeof clientSideCache.obj !== "undefined") {
+        return clientSideCache.obj;
       }
 
-      return (cache = parse(document.cookie));
+      return (clientSideCache.obj = parse(document.cookie));
     }
 
     if (typeof req === "undefined") {

@@ -48,15 +48,10 @@ class Config {
       return defaultValue;
     }
 
-    // If the user is already assigned a bucket, return that one.
-    if (typeof this.cookie[key] !== "undefined") {
-      return this.cookie[key];
-    }
-
     const id = identity.get(this.request);
     const segment = id.segment || "";
     const version = +id.version || 0;
-    let rand = Math.random(0, 1) * 100;
+    let rand = this.cookie[key] || Math.random(0, 1) * 100;
     let value;
 
     // Otherwise check the targetings, try to find the first matching one.
@@ -95,9 +90,22 @@ class Config {
       ) {
         rand = rand - +targeting.percentile;
 
-        if (rand > 0) {
+        if (rand >= 0) {
           continue;
         }
+
+        // Save the value to the cookie so that next time we re-use it.
+        // If the user falls in a bucket, say for instance 80%, we save
+        // the percentile 80. When the application owner changes the experiment
+        // and increases the percentage, the user in the control group
+        // will stay in the same bucket.
+        this.cookie[key] = targeting.percentile;
+        cookies.set({
+          name: "sk_rc",
+          value: encodeURIComponent(JSON.stringify(this.cookie)),
+          days: 15,
+          response: this.response
+        });
       }
 
       value = targeting.value;
@@ -105,16 +113,6 @@ class Config {
     }
 
     if (typeof value !== "undefined") {
-      this.cookie[key] = value;
-
-      // Save the value to the cookie so that next time we re-use it.
-      cookies.set({
-        name: "sk_rc",
-        days: 15,
-        value: encodeURIComponent(JSON.stringify(this.cookie)),
-        response: this.response
-      });
-
       return value;
     }
 
