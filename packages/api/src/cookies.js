@@ -18,27 +18,54 @@ function parse(cookie = "") {
 }
 
 // Client side calls will be cached.
-let cache;
+export let clientSideCache = {};
 
-/**
- * Export a function to retrieve the cookies.
- */
-export default req => {
-  // Client-Side
-  if (typeof document !== "undefined") {
-    if (typeof cache !== "undefined") {
-      return cache;
+export default {
+  /**
+   * Parses the cookies header and returns a key-value object.
+   */
+  parse: req => {
+    // Client-Side
+    if (typeof document !== "undefined") {
+      if (typeof clientSideCache.obj !== "undefined") {
+        return clientSideCache.obj;
+      }
+
+      return (clientSideCache.obj = parse(document.cookie));
     }
 
-    return (cache = parse(document.cookie));
-  }
+    if (typeof req === "undefined") {
+      throw new Error(
+        "@stormkit/api: Server side calls require to pass down the request object."
+      );
+    }
 
-  if (typeof req === "undefined") {
-    throw new Error(
-      "[sk.config]: Server side calls require to pass down the request object."
-    );
-  }
+    // Server-Side
+    return parse(req.header("cookie"));
+  },
 
-  // Server-Side
-  return parse(req.header("cookie"));
+  /**
+   * Sets a cookie value.
+   */
+  set: ({ name, value, days, response }) => {
+    let expires = "";
+
+    if (days) {
+      const date = new Date();
+      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
+      expires = "; expires=" + date.toUTCString();
+    }
+
+    const cookie = name + "=" + (value || "") + expires + "; path=/";
+
+    if (typeof document !== "undefined") {
+      document.cookie = cookie;
+    } else if (typeof response !== "undefined") {
+      response.setHeader("Set-Cookie", cookie);
+    } else {
+      throw new Error(
+        "@stormkit/api: The cookie set method expects either a global document object or a response object."
+      );
+    }
+  }
 };
