@@ -16,6 +16,30 @@ or
 npm install @stormkit/api
 ```
 
+### API
+
+#### - Stormkit.context
+
+```
+Stormkit.context(ctx, request)
+```
+
+Sets the context for the current user. It accepts an object as the first argument, and the NodeJS request object on server side environments as a second argument.
+
+The ctx argument is an object that accepts the `segment` and `version` properties. `segment` is a string value defined at your will, and `version` is a number value.
+
+#### - Stormkit.config
+
+```
+Stormkit.config(request, response)
+```
+
+Retrieves a remote configuration parameter. The only arguments are the NodeJS request and response objects.
+On client-side calls these paremeters are omitted.
+
+This function returns a `Config` class that exports the `get` method. You can use it to retrieve
+the parameter value. See examples below.
+
 ### Remote Configuration
 
 In order to use the remote configuration, you will have to create an application on [Stormkit](https://www.stormkit.io).
@@ -47,7 +71,7 @@ import sk from "@stormkit/api";
 
 export default (req, res) => {
   // Identify the user
-  sk.user({ segment: "my-segment" });
+  sk.context({ segment: "my-segment" });
 
   // For client-side calls the request and response objects are omitted
   console.log(sk.config(req, res).get("my-key"));

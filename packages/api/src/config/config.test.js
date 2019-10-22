@@ -1,6 +1,6 @@
 import jsdom from "jsdom";
 import cookies, { clientSideCache as cookieCache } from "../cookies";
-import identity from "../identity/identity";
+import context from "../context/context";
 import config, { cache } from "./config";
 
 describe("config", () => {
@@ -81,7 +81,7 @@ describe("config", () => {
 
     test("should save the value into a cookie only when percentile is matched", () => {
       global.Math.random = jest.fn().mockReturnValue(0.8);
-      identity.set({ version: "7" });
+      context.set({ version: "7" });
       expect(cnf().get("feature3")).toBe("value3");
       expect(decodeURIComponent(document.cookie)).toBe("");
       expect(cnf().get("feature4")).toBe("value4-b");
@@ -97,22 +97,22 @@ describe("config", () => {
     });
 
     test("multiple values, different segments and appVersions", () => {
-      identity.set({ segment: "invalid-segment", version: "16" });
+      context.set({ segment: "invalid-segment", version: "16" });
       expect(cnf().get("feature1", "")).toBe("");
 
-      identity.set({ segment: "my-segment-match", version: "16" });
+      context.set({ segment: "my-segment-match", version: "16" });
       expect(cnf().get("feature1", "")).toBe("value1-a");
-      identity.set({ segment: "my-segment-match" }); // misses version
+      context.set({ segment: "my-segment-match" }); // misses version
       expect(cnf().get("feature1", "")).toBe("");
 
-      identity.set({ segment: "my-other-segment", version: "8" }); // segment and version matches
+      context.set({ segment: "my-other-segment", version: "8" }); // segment and version matches
       expect(cnf().get("feature1", "")).toBe("value1-b");
-      identity.set({ segment: "my-other-segment", version: "16" }); // segment matches, version does not
+      context.set({ segment: "my-other-segment", version: "16" }); // segment matches, version does not
       expect(cnf().get("feature1", "")).toBe("");
 
-      identity.set({ version: "10" }); // version matches
+      context.set({ version: "10" }); // version matches
       expect(cnf().get("feature1", "")).toBe("value1-c");
-      identity.set({ version: "11" }); // version does not matches
+      context.set({ version: "11" }); // version does not matches
       expect(cnf().get("feature1", "")).toBe("");
     });
 

@@ -1,5 +1,5 @@
 import cookies from "../cookies";
-import identity from "../identity/identity";
+import context from "../context/context";
 
 /**
  * Checks whether the given value is an object or not.
@@ -51,7 +51,7 @@ class Config {
     let rand = this.cookie[key] || Math.random(0, 1) * 100;
     let value;
 
-    const id = identity.get(this.request);
+    const id = context.get(this.request);
     const segment = id.segment || "";
     const version = +id.version || 0;
     const initialRand = rand;
