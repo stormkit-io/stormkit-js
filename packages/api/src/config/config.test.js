@@ -3,6 +3,8 @@ import cookies, { clientSideCache as cookieCache } from "../cookies";
 import context from "../context/context";
 import config, { cache } from "./config";
 
+jest.useFakeTimers();
+
 describe("config", () => {
   const removeCookies = () => {
     document.cookie.split(";").forEach(function(c) {
@@ -50,6 +52,7 @@ describe("config", () => {
             targetings: [{ value: "value2", appVersion: "< 10" }]
           },
           feature3: {
+            experimentId: "xGabX41",
             targetings: [{ value: "value3" }]
           },
           feature4: {
@@ -72,6 +75,7 @@ describe("config", () => {
     });
 
     afterEach(() => {
+      delete window.ga;
       removeCookies();
     });
 
@@ -131,6 +135,41 @@ describe("config", () => {
 
     test("should use the cached version for client-side calls", () => {
       expect(config()).toBe(config());
+    });
+
+    test("should sync with Google Optimize", async done => {
+      window.ga = jest.fn();
+      cnf().get("feature3");
+      const expId = cnf().config.feature3.experimentId;
+      jest.advanceTimersByTime(1000);
+
+      // Flush promises
+      await (() => new Promise(setImmediate))();
+
+      expect(window.ga).toHaveBeenCalledWith("set", "exp", `${expId}.value3`);
+      done();
+
+      // Subsequent calls should not sync the value.
+      cnf().get("feature3");
+      jest.advanceTimersByTime(1000);
+      expect(window.ga).toHaveBeenCalledTimes(1);
+
+      // Also no experiments should not trigger
+      cnf().get("feature1");
+      jest.advanceTimersByTime(1000);
+      expect(window.ga).toHaveBeenCalledTimes(1);
+    });
+
+    test("should not throw when Google Optimize is not loaded", async done => {
+      delete window.ga;
+      cnf().get("feature3");
+      jest.advanceTimersByTime(20000);
+
+      // Flush promises
+      await (() => new Promise(setImmediate))();
+
+      // Should not throw
+      done();
     });
   });
 

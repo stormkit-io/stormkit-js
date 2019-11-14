@@ -27,6 +27,41 @@ function parseCookieValue(request) {
   }
 }
 
+/**
+ * Return the google analytics object. This function times out
+ * after 10 seconds.
+ */
+const googleAnalytics = (() => {
+  let prom;
+
+  return () => {
+    if (prom) {
+      return prom;
+    }
+
+    return (prom = new Promise((resolve, reject) => {
+      let i = 0;
+      const INTERVAL = 250;
+
+      // Wait until google analytics is loaded
+      const int = setInterval(() => {
+        if (typeof window.ga === "function") {
+          clearInterval(int);
+          return resolve(window.ga);
+        }
+
+        // Stop if we've been trying for more than 10 seconds
+        if (i > 10000 / INTERVAL) {
+          clearInterval(int);
+          reject();
+        }
+
+        i++;
+      }, INTERVAL);
+    }));
+  };
+})();
+
 class Config {
   constructor(config, request, response) {
     this.config = config || {};
@@ -114,11 +149,50 @@ class Config {
       break;
     }
 
+    let returnedValue;
+
     if (typeof value !== "undefined") {
-      return value;
+      returnedValue = value;
+    } else {
+      returnedValue = defaultValue;
     }
 
-    return defaultValue;
+    // Sync the experiment with external services
+    this.sync(key, returnedValue);
+
+    return returnedValue;
+  }
+
+  /**
+   * Synchronises experiments with known providers. For now, it only
+   * works with Google Optimize. If a different provider is needed, use the config
+   * class property to read the experiment id and sync with the custom provider.
+   */
+  sync(key, value) {
+    // Sync only on client side.
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    const obj = this.config[key];
+
+    if (isObject(obj) === false) {
+      throw new Error("@stormkit/api: Key not found in config: " + key);
+    }
+
+    if (obj._synced || !obj.experimentId) {
+      return;
+    }
+
+    googleAnalytics()
+      .then(ga => {
+        ga("set", "exp", `${obj.experimentId}.${value}`);
+      })
+      .catch(() => {
+        // Do nothing
+      });
+
+    obj._synced = true;
   }
 }
 
