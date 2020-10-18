@@ -35,7 +35,7 @@ Stormkit.config(request, response)
 ```
 
 Retrieves a remote configuration parameter. The only arguments are the NodeJS request and response objects.
-On client-side calls these paremeters are omitted.
+On client-side calls these parameters are omitted.
 
 This function returns a `Config` class that exports the `get` method. You can use it to retrieve
 the parameter value. See examples below.
